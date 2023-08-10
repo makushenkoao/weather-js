@@ -12,7 +12,6 @@ const TAB1 = document.getElementById("tab1");
 const TAB2 = document.getElementById("tab2");
 
 let inputValue;
-let currentCity;
 
 const NOT_FOUND_SECTION = `
   <div
@@ -24,10 +23,6 @@ const NOT_FOUND_SECTION = `
       <p>Please enter a different location</p>
     </div>
   </div>`;
-
-SEARCH_INPUT.onchange = ({ target: { value } }) => {
-  inputValue = value;
-};
 
 if ("geolocation" in navigator) {
   navigator.geolocation.getCurrentPosition(
@@ -58,6 +53,10 @@ function getCityFromCoordinates(latitude, longitude) {
       console.log("Error getting city:", error);
     });
 }
+
+SEARCH_INPUT.onchange = ({ target: { value } }) => {
+  inputValue = value;
+};
 
 function fetchWeather(value) {
   fetch(`${API_FORECAST}?q=${value || inputValue}&appid=${API_KEY}&cnt=8`)
@@ -157,29 +156,6 @@ function displayForecastWeather(data) {
     </table>
   </div>`;
   createCardList(data);
-}
-
-function normalizedTem(temp) {
-  return `${(temp - 273.15).toFixed()}°C`;
-}
-
-function formatUnixTimestampAndOutputTimezone(unixTimestamp) {
-  const date = new Date(unixTimestamp * 1000);
-  const hours = date.getHours();
-  const minutes = date.getMinutes();
-  const period = hours >= 12 ? "PM" : "AM";
-  const normalizedHours = hours % 12 || 12;
-  const normalizedMinutes = minutes < 10 ? `0${minutes}` : minutes;
-  return `${normalizedHours}:${normalizedMinutes} ${period}`;
-}
-
-function formatUnixTimestamp(unixTimestamp) {
-  const date = new Date(unixTimestamp * 1000);
-  const hours = date.getHours();
-  const minutes = date.getMinutes();
-  const normalizedHours = hours % 12 || 12;
-  const normalizedMinutes = minutes < 10 ? `0${minutes}` : minutes;
-  return `${normalizedHours}:${normalizedMinutes}`;
 }
 
 function createTable(list, tableId) {
@@ -330,6 +306,29 @@ function formatDayOfWeek(unixTimestamp) {
   ];
   const date = new Date(unixTimestamp * 1000);
   return daysOfWeek[date.getDay()];
+}
+
+function normalizedTem(temp) {
+  return `${(temp - 273.15).toFixed()}°C`;
+}
+
+function formatUnixTimestampAndOutputTimezone(unixTimestamp) {
+  const date = new Date(unixTimestamp * 1000);
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+  const period = hours >= 12 ? "PM" : "AM";
+  const normalizedHours = hours % 12 || 12;
+  const normalizedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+  return `${normalizedHours}:${normalizedMinutes} ${period}`;
+}
+
+function formatUnixTimestamp(unixTimestamp) {
+  const date = new Date(unixTimestamp * 1000);
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+  const normalizedHours = hours % 12 || 12;
+  const normalizedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+  return `${normalizedHours}:${normalizedMinutes}`;
 }
 
 function createDetailedWeatherTable(dayForecast) {
