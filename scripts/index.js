@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
-  openTab(null, "tab1");
-  document.querySelectorAll(".tab")[0].classList.add("active");
+  openTab(null, "tab2");
+  document.querySelectorAll(".tab")[1].classList.add("active");
 });
 
 const __API__ = "https://api.openweathermap.org/data/2.5";
@@ -12,6 +12,7 @@ const TAB1 = document.getElementById("tab1");
 const TAB2 = document.getElementById("tab2");
 
 let inputValue;
+let currentCity;
 
 const NOT_FOUND_SECTION = `
   <div
@@ -28,8 +29,38 @@ SEARCH_INPUT.onchange = ({ target: { value } }) => {
   inputValue = value;
 };
 
-BUTTON_INPUT.onclick = () => {
-  fetch(`${API_FORECAST}?q=${inputValue || "Kyiv"}&appid=${API_KEY}&cnt=8`)
+if ("geolocation" in navigator) {
+  navigator.geolocation.getCurrentPosition(
+    function (position) {
+      const latitude = position.coords.latitude;
+      const longitude = position.coords.longitude;
+
+      getCityFromCoordinates(latitude, longitude);
+    },
+    function (error) {
+      console.log("Error getting location:", error);
+    },
+  );
+} else {
+  console.log("Geolocation is not supported in this browser");
+}
+
+function getCityFromCoordinates(latitude, longitude) {
+  const apiUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`;
+  fetch(apiUrl)
+    .then((response) => response.json())
+    .then((data) => {
+      const city =
+        data.address.city || data.address.town || data.address.village;
+      fetchWeather(city);
+    })
+    .catch((error) => {
+      console.log("Error getting city:", error);
+    });
+}
+
+function fetchWeather(value) {
+  fetch(`${API_FORECAST}?q=${value || inputValue}&appid=${API_KEY}&cnt=8`)
     .then((response) => response.json())
     .then((data) => {
       displayCurrentWeather(data);
@@ -38,7 +69,7 @@ BUTTON_INPUT.onclick = () => {
       console.log("->->->GET WEATHER DATA ERROR<-<-<-\n", e);
       TAB1.innerHTML = NOT_FOUND_SECTION;
     });
-  fetch(`${API_FORECAST}?q=${inputValue || "Kyiv"}&appid=${API_KEY}`)
+  fetch(`${API_FORECAST}?q=${value || inputValue}&appid=${API_KEY}`)
     .then((response) => response.json())
     .then((data) => {
       displayForecastWeather(data);
@@ -47,6 +78,10 @@ BUTTON_INPUT.onclick = () => {
       console.log("->->->GET WEATHER DATA ERROR<-<-<-\n", e);
       TAB2.innerHTML = NOT_FOUND_SECTION;
     });
+}
+
+BUTTON_INPUT.onclick = () => {
+  fetchWeather();
 };
 
 function openTab(event, tabName) {
@@ -107,140 +142,18 @@ function displayCurrentWeather(data) {
     <div class="bg_white padding10x20 v_stack gap16">
       <h3>HOURLY</h3>
       <table class="padding0x30 text_left" id="current_weather_table">
-        
       </table>
     </div>
   </div>`;
-  createTable(currentWeatherForecast);
+  createTable(currentWeatherForecast, "current_weather_table");
 }
 
 function displayForecastWeather(data) {
   TAB2.innerHTML = `
-  <div class="h_stack" id="card_list">
-    <div
-      class="v_stack gap8 w288 bg_gray border_right_gray padding10x20 pointer hover"
-    >
-      <h5>TONIGHT</h5>
-      <p class="color_gray">JUN 30</p>
-      <img
-        src="https://www.pngall.com/wp-content/uploads/2016/07/Sun-Download-PNG.png"
-        width="100"
-        height="100"
-        alt=""
-      />
-      <p class="fs_l color_black">36°C</p>
-      <p class="color_gray">Clear, Warm</p>
-    </div>
-    <div
-      class="v_stack gap8 w288 bg_gray border_right_gray padding10x20 pointer hover"
-    >
-      <h5>TONIGHT</h5>
-      <p class="color_gray">JUN 30</p>
-      <img
-        src="https://www.pngall.com/wp-content/uploads/2016/07/Sun-Download-PNG.png"
-        width="100"
-        height="100"
-        alt=""
-      />
-      <p class="fs_l color_black">36°C</p>
-      <p class="color_gray">Clear, Warm</p>
-    </div>
-    <div
-      class="v_stack gap8 w288 bg_gray border_right_gray padding10x20 pointer hover"
-    >
-      <h5>TONIGHT</h5>
-      <p class="color_gray">JUN 30</p>
-      <img
-        src="https://www.pngall.com/wp-content/uploads/2016/07/Sun-Download-PNG.png"
-        width="100"
-        height="100"
-        alt=""
-      />
-      <p class="fs_l color_black">36°C</p>
-      <p class="color_gray">Clear, Warm</p>
-    </div>
-    <div
-      class="v_stack gap8 w288 bg_gray border_right_gray padding10x20 pointer hover"
-    >
-      <h5>TONIGHT</h5>
-      <p class="color_gray">JUN 30</p>
-      <img
-        src="https://www.pngall.com/wp-content/uploads/2016/07/Sun-Download-PNG.png"
-        width="100"
-        height="100"
-        alt=""
-      />
-      <p class="fs_l color_black">36°C</p>
-      <p class="color_gray">Clear, Warm</p>
-    </div>
-    <div
-      class="v_stack gap8 w288 bg_gray border_right_gray padding10x20 pointer hover"
-    >
-      <h5>TONIGHT</h5>
-      <p class="color_gray">JUN 30</p>
-      <img
-        src="https://www.pngall.com/wp-content/uploads/2016/07/Sun-Download-PNG.png"
-        width="100"
-        height="100"
-        alt=""
-      />
-      <p class="fs_l color_black">36°C</p>
-      <p class="color_gray">Clear, Warm</p>
-    </div>
-  </div>
+  <div class="h_stack" id="card_list"></div>
   <div class="mt10 bg_white padding10x20 v_stack gap16">
-    <div class="current_weather_hourly__header">
-      <h3>HOURLY</h3>
-    </div>
-    <table class="custom-table">
-      <tr>
-        <th>Sunday</th>
-        <td>
-        <p>7pm</p>
-          <img
-        src="https://www.pngall.com/wp-content/uploads/2016/07/Sun-Download-PNG.png"
-        width="30"
-        height="30"
-        alt=""
-      />
-        </td>
-        <td>cell 2</td>
-        <td>cell 3</td>
-        <td>cell 4</td>
-        <td>cell 5</td>
-      </tr>
-      <tr>
-        <th>Forecast</th>
-        <td>Sunny</td>
-        <td>Sunny</td>
-        <td>Sunny</td>
-        <td>Sunny</td>
-        <td>Sunny</td>
-      </tr>
-      <tr>
-        <th>Temp</th>
-        <td>cell 1</td>
-        <td>cell 2</td>
-        <td>cell 3</td>
-        <td>cell 4</td>
-        <td>cell 5</td>
-      </tr>
-      <tr>
-        <th>RealFeel</th>
-        <td>cell 1</td>
-        <td>cell 2</td>
-        <td>cell 3</td>
-        <td>cell 4</td>
-        <td>cell 5</td>
-      </tr>
-      <tr>
-        <th>Wind (km/h)</th>
-        <td>cell 1</td>
-        <td>cell 2</td>
-        <td>cell 3</td>
-        <td>cell 4</td>
-        <td>cell 5</td>
-      </tr>
+    <h3>HOURLY</h3>
+    <table class="custom-table" id="forecast_weather_table">
     </table>
   </div>`;
   createCardList(data);
@@ -251,18 +164,17 @@ function normalizedTem(temp) {
 }
 
 function formatUnixTimestampAndOutputTimezone(unixTimestamp) {
-  const date = new Date(unixTimestamp * 1000); // Преобразуем в миллисекунды
+  const date = new Date(unixTimestamp * 1000);
   const hours = date.getHours();
   const minutes = date.getMinutes();
   const period = hours >= 12 ? "PM" : "AM";
   const normalizedHours = hours % 12 || 12;
   const normalizedMinutes = minutes < 10 ? `0${minutes}` : minutes;
-  const formattedTime = `${normalizedHours}:${normalizedMinutes} ${period}`;
-  return formattedTime;
+  return `${normalizedHours}:${normalizedMinutes} ${period}`;
 }
 
 function formatUnixTimestamp(unixTimestamp) {
-  const date = new Date(unixTimestamp * 1000); // Преобразуем в миллисекунды
+  const date = new Date(unixTimestamp * 1000);
   const hours = date.getHours();
   const minutes = date.getMinutes();
   const normalizedHours = hours % 12 || 12;
@@ -270,10 +182,8 @@ function formatUnixTimestamp(unixTimestamp) {
   return `${normalizedHours}:${normalizedMinutes}`;
 }
 
-function createTable(list) {
-  const CURRENT_WEATHER_TABLE = document.getElementById(
-    "current_weather_table",
-  );
+function createTable(list, tableId) {
+  const CURRENT_WEATHER_TABLE = document.getElementById(tableId);
 
   const titles = ["Sunday", "Forecast", "Temp", "RealFeel", "Wind (km/h)"];
 
@@ -281,6 +191,7 @@ function createTable(list) {
   for (const title of titles) {
     const th = document.createElement("th");
     th.textContent = title;
+    th.classList.add("text_left");
     headerRow.appendChild(th);
   }
 
@@ -292,8 +203,7 @@ function createTable(list) {
     const tdTimeWithIcon = document.createElement("td");
     const iconImg = document.createElement("img");
     const timeP = document.createElement("p");
-    const iconUrl = `http://openweathermap.org/img/w/${forecast.weather[0].icon}.png`;
-    iconImg.src = iconUrl;
+    iconImg.src = `http://openweathermap.org/img/w/${forecast.weather[0].icon}.png`;
     iconImg.width = 50;
     iconImg.height = 50;
     timeP.innerText = formatUnixTimestampAndOutputTimezone(forecast.dt);
@@ -327,54 +237,113 @@ function createTable(list) {
 }
 
 function createCardList(data) {
-  console.log(data)
   const CARD_LIST = document.getElementById("card_list");
-  // <div
-  //     className="v_stack gap8 w288 bg_gray border_right_gray padding10x20 pointer hover"
-  // >
-  //   <h5>TONIGHT</h5>
-  //   <p className="color_gray">JUN 30</p>
-  //   <img
-  //       src="https://www.pngall.com/wp-content/uploads/2016/07/Sun-Download-PNG.png"
-  //       width="100"
-  //       height="100"
-  //       alt=""
-  //   />
-  //   <p className="fs_l color_black">36°C</p>
-  //   <p className="color_gray">Clear, Warm</p>
-  // </div>
-  const cardWrapper = document.createElement("div");
-  cardWrapper.classList.add("v_stack");
-  cardWrapper.classList.add("gap8");
-  cardWrapper.classList.add("w288");
-  cardWrapper.classList.add("bg_gray");
-  cardWrapper.classList.add("border_right_gray");
-  cardWrapper.classList.add("padding10x20");
-  cardWrapper.classList.add("pointer");
-  cardWrapper.classList.add("hover");
 
-  const title = document.createElement("h5");
-  const dataP = document.createElement("p");
-  dataP.classList.add("color_gray");
-  const img = document.createElement("img");
-  const temp = document.createElement("p");
-  temp.classList.add("fs_l");
-  temp.classList.add("color_black");
-  const forecast = document.createElement("p");
-  forecast.classList.add("color_gray");
+  CARD_LIST.innerHTML = "";
 
-  title.innerText = "TONIGHT";
-  dataP.innerText = "JUN 30";
-  img.src = "";
-  img.width = 100;
-  img.height = 100;
-  temp.innerText = "36°C";
-  forecast.innerText = "Clear, Warm";
+  const dailyForecast = groupDataByDay(data.list);
 
-  cardWrapper.appendChild(title);
-  cardWrapper.appendChild(dataP);
-  cardWrapper.appendChild(img);
-  cardWrapper.appendChild(temp);
-  cardWrapper.appendChild(forecast);
-  CARD_LIST.appendChild(cardWrapper);
+  for (const [index, dayForecast] of dailyForecast.entries()) {
+    const cardWrapper = document.createElement("div");
+    cardWrapper.classList.add(
+      "v_stack",
+      "gap8",
+      "w288",
+      "bg_gray",
+      "border_right_gray",
+      "padding10x20",
+      "pointer",
+      "hover",
+    );
+
+    const title = document.createElement("h5");
+    const dataP = document.createElement("p");
+    const img = document.createElement("img");
+    const temp = document.createElement("p");
+    const forecastText = document.createElement("p");
+
+    title.innerText = formatUnixTimestampAndOutputTimezone(dayForecast[0].dt);
+    dataP.innerText = formatDayOfWeek(dayForecast[0].dt);
+    img.src = `http://openweathermap.org/img/w/${dayForecast[0].weather[0].icon}.png`;
+    img.width = 100;
+    img.height = 100;
+
+    const averageTemp = calculateAverageTemp(dayForecast);
+    temp.innerText = normalizedTem(averageTemp);
+
+    forecastText.innerText = dayForecast[0].weather[0].description;
+
+    cardWrapper.addEventListener("click", () => {
+      const activeCard = CARD_LIST.querySelector(".selected_day");
+      if (activeCard) {
+        activeCard.classList.remove("selected_day");
+      }
+      cardWrapper.classList.add("selected_day");
+      createDetailedWeatherTable(dayForecast);
+    });
+
+    cardWrapper.appendChild(title);
+    cardWrapper.appendChild(dataP);
+    cardWrapper.appendChild(img);
+    cardWrapper.appendChild(temp);
+    cardWrapper.appendChild(forecastText);
+    CARD_LIST.appendChild(cardWrapper);
+
+    if (index === 0) {
+      createDetailedWeatherTable(dayForecast);
+      cardWrapper.classList.add("selected_day");
+    }
+  }
+}
+
+function groupDataByDay(data) {
+  const groupedData = {};
+
+  for (const forecast of data) {
+    const date = forecast.dt_txt.split(" ")[0];
+    if (!groupedData[date]) {
+      groupedData[date] = [];
+    }
+    groupedData[date].push(forecast);
+  }
+
+  return Object.values(groupedData);
+}
+
+function calculateAverageTemp(forecasts) {
+  const totalTemp = forecasts.reduce(
+    (sum, forecast) => sum + forecast.main.temp,
+    0,
+  );
+  return totalTemp / forecasts.length;
+}
+
+function formatDayOfWeek(unixTimestamp) {
+  const daysOfWeek = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ];
+  const date = new Date(unixTimestamp * 1000);
+  return daysOfWeek[date.getDay()];
+}
+
+function createDetailedWeatherTable(dayForecast) {
+  const forecastTable = document.getElementById("forecast_weather_table");
+  const detailedTable = document.getElementById("detailed_weather_table");
+
+  if (detailedTable) {
+    detailedTable.remove();
+  }
+
+  const newDetailedTable = document.createElement("table");
+  newDetailedTable.id = "detailed_weather_table";
+  newDetailedTable.classList.add("padding10x20");
+  forecastTable.insertAdjacentElement("afterend", newDetailedTable);
+
+  createTable(dayForecast, "detailed_weather_table");
 }
