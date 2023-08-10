@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
-  openTab(null, "tab2");
-  document.querySelectorAll(".tab")[1].classList.add("active");
+  openTab(null, "tab1");
+  document.querySelectorAll(".tab")[0].classList.add("active");
 });
 
 const __API__ = "https://api.openweathermap.org/data/2.5";
