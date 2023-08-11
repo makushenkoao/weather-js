@@ -15,20 +15,28 @@
       <header class="bg_gray padding10x20 h_stack between center">
         <h1>MY WEATHER</h1>
         <div class="h_stack gap8">
-          <input
-            type="text"
-            class="search"
-            placeholder="Enter city"
-            id="search"
-          />
-          <button id="button">Search</button>
+          <form id="form">
+            <input
+              type="text"
+              class="search"
+              placeholder="Enter city"
+              id="search"
+            />
+            <button type="submit" class="button">Search</button>
+          </form>
         </div>
       </header>
       <div class="tabs h_stack bg_dark_gray color_white">
-        <div class="tab padding10x20 pointer hover" onclick="openTab(event, 'tab1')">
+        <div
+          class="tab padding10x20 pointer hover"
+          onclick="openTab(event, 'tab1')"
+        >
           Today
         </div>
-        <div class="tab padding10x20 pointer hover" onclick="openTab(event, 'tab2')">
+        <div
+          class="tab padding10x20 pointer hover"
+          onclick="openTab(event, 'tab2')"
+        >
           5-day forecast
         </div>
       </div>

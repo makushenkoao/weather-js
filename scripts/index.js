@@ -22,8 +22,8 @@ function openTab(event, tabName) {
 const API_KEY = "4b15209f0f4545becb6ba83dbb309700";
 const __API__ = "https://api.openweathermap.org/data/2.5";
 const API_FORECAST = `${__API__}/forecast`;
+const FORM = document.getElementById("form");
 const SEARCH_INPUT = document.getElementById("search");
-const BUTTON_INPUT = document.getElementById("button");
 const TAB1 = document.getElementById("tab1");
 const TAB2 = document.getElementById("tab2");
 
@@ -70,6 +70,12 @@ function getCityFromCoordinates(latitude, longitude) {
     });
 }
 
+FORM.onsubmit = (e) => {
+  e.preventDefault()
+  console.log('submit')
+  fetchWeather();
+}
+
 SEARCH_INPUT.onchange = ({ target: { value } }) => {
   inputValue = value;
 };
@@ -96,10 +102,6 @@ function fetchWeather(value) {
     });
 }
 
-BUTTON_INPUT.onclick = () => {
-  fetchWeather();
-};
-
 function displayCurrentWeather(data) {
   const currentWeather = data.list[0];
   const {
@@ -114,7 +116,7 @@ function displayCurrentWeather(data) {
     <div class="padding10x20 v_stack gap16 bg_white">
       <div class="h_stack between">
         <h3>CURRENT WEATHER - ${name}</h3>
-        <h3>${currentWeather.dt_txt}</h3>
+        <h3>${formatDate(currentWeather.dt_txt)}</h3>
       </div>
       <div class="around h_stack center color_gray">
         <div class="v_stack center">
