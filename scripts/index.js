@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 const __API__ = "https://api.openweathermap.org/data/2.5";
-const API_KEY = "4b15209f0f4545becb6ba83dbb309700";
+const API_KEY = "your api key";
 const API_FORECAST = `${__API__}/forecast`;
 const SEARCH_INPUT = document.getElementById("search");
 const BUTTON_INPUT = document.getElementById("button");
