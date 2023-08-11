@@ -88,14 +88,13 @@ BUTTON_INPUT.onclick = () => {
 
 function displayCurrentWeather(data) {
   const currentWeather = data.list[0];
+  console.log(currentWeather);
   const {
     city: { name, sunrise, sunset, timezone },
   } = data;
   const { main } = currentWeather;
   const { main: mainWeather, icon } = currentWeather.weather[0];
   const iconUrl = `http://openweathermap.org/img/w/${icon}.png`;
-
-  const currentWeatherForecast = data.list.slice(1);
 
   TAB1.innerHTML = `
   <div class="v_stack gap16">
@@ -131,7 +130,7 @@ function displayCurrentWeather(data) {
       </table>
     </div>
   </div>`;
-  createTable(currentWeatherForecast, "current_weather_table");
+  createTable(data.list, "current_weather_table");
 }
 
 function displayForecastWeather(data) {
@@ -149,7 +148,8 @@ function createTable(list, tableId) {
   const CURRENT_WEATHER_TABLE = document.getElementById(tableId);
   CURRENT_WEATHER_TABLE.innerHTML = "";
 
-  const titles = ["Today", "Forecast", "Temp", "RealFeel", "Wind (km/h)"];
+  console.log(list[0].dt_txt)
+  const titles = [formatDayOfWeek(list[0].dt_txt), "Forecast", "Temp", "RealFeel", "Wind (km/h)"];
 
   const headerRow = document.createElement("tr");
   for (const title of titles) {
