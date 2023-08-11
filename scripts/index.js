@@ -19,8 +19,7 @@ function openTab(event, tabName) {
   event?.currentTarget.classList.add("active");
 }
 
-
-const API_KEY = "4b15209f0f4545becb6ba83dbb309700"
+const API_KEY = "4b15209f0f4545becb6ba83dbb309700";
 const __API__ = "https://api.openweathermap.org/data/2.5";
 const API_FORECAST = `${__API__}/forecast`;
 const SEARCH_INPUT = document.getElementById("search");
@@ -103,7 +102,6 @@ BUTTON_INPUT.onclick = () => {
 
 function displayCurrentWeather(data) {
   const currentWeather = data.list[0];
-  console.log(currentWeather);
   const {
     city: { name, sunrise, sunset, timezone },
   } = data;
@@ -163,8 +161,13 @@ function createTable(list, tableId) {
   const CURRENT_WEATHER_TABLE = document.getElementById(tableId);
   CURRENT_WEATHER_TABLE.innerHTML = "";
 
-  console.log(list[0].dt_txt)
-  const titles = [formatDayOfWeek(list[0].dt_txt), "Forecast", "Temp", "RealFeel", "Wind (km/h)"];
+  const titles = [
+    formatDayOfWeek(list[0].dt_txt),
+    "Forecast",
+    "Temp",
+    "RealFeel",
+    "Wind (km/h)",
+  ];
 
   const headerRow = document.createElement("tr");
   for (const title of titles) {
@@ -236,7 +239,7 @@ function createCardList(data) {
     );
 
     const title = document.createElement("h5");
-    title.classList.add('fs_m')
+    title.classList.add("fs_m");
     const dataP = document.createElement("p");
     const img = document.createElement("img");
     const temp = document.createElement("p");
@@ -293,8 +296,8 @@ function groupDataByDay(data) {
 
 function calculateAverageTemp(forecasts) {
   const totalTemp = forecasts.reduce(
-      (sum, forecast) => sum + forecast.main.temp,
-      0,
+    (sum, forecast) => sum + forecast.main.temp,
+    0,
   );
   return totalTemp / forecasts.length;
 }
@@ -338,8 +341,18 @@ function formatUnixTimestamp(unixTimestamp) {
 
 function formatDate(inputDate) {
   const months = [
-    "JAN", "FEB", "MAR", "APR", "MAY", "JUN",
-    "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"
+    "JAN",
+    "FEB",
+    "MAR",
+    "APR",
+    "MAY",
+    "JUN",
+    "JUL",
+    "AUG",
+    "SEP",
+    "OCT",
+    "NOV",
+    "DEC",
   ];
 
   const date = new Date(inputDate);
