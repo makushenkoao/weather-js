@@ -1,13 +1,28 @@
-import { API_FORECAST, API_KEY } from "./consts.js";
-import {
-  groupDataByDay,
-  calculateAverageTemp,
-  formatDayOfWeek,
-  normalizedTem,
-  formatUnixTimestampAndOutputTimezone,
-  formatUnixTimestamp, formatDate,
-} from "./utils.js";
+document.addEventListener("DOMContentLoaded", function () {
+  openTab(null, "tab1");
+  document.querySelectorAll(".tab")[0].classList.add("active");
+});
 
+function openTab(event, tabName) {
+  const tabContents = document.querySelectorAll(".tab-content");
+  for (const content of tabContents) {
+    content.classList.remove("active");
+  }
+
+  const tabs = document.querySelectorAll(".tab");
+  for (const tab of tabs) {
+    tab.classList.remove("active");
+  }
+
+  const selectedTab = document.getElementById(tabName);
+  selectedTab.classList.add("active");
+  event?.currentTarget.classList.add("active");
+}
+
+
+const API_KEY = "4b15209f0f4545becb6ba83dbb309700"
+const __API__ = "https://api.openweathermap.org/data/2.5";
+const API_FORECAST = `${__API__}/forecast`;
 const SEARCH_INPUT = document.getElementById("search");
 const BUTTON_INPUT = document.getElementById("button");
 const TAB1 = document.getElementById("tab1");
@@ -260,4 +275,76 @@ function createCardList(data) {
       cardWrapper.classList.add("selected_day");
     }
   }
+}
+
+function groupDataByDay(data) {
+  const groupedData = {};
+
+  for (const forecast of data) {
+    const date = forecast.dt_txt.split(" ")[0];
+    if (!groupedData[date]) {
+      groupedData[date] = [];
+    }
+    groupedData[date].push(forecast);
+  }
+
+  return Object.values(groupedData);
+}
+
+function calculateAverageTemp(forecasts) {
+  const totalTemp = forecasts.reduce(
+      (sum, forecast) => sum + forecast.main.temp,
+      0,
+  );
+  return totalTemp / forecasts.length;
+}
+
+function formatDayOfWeek(inputDate) {
+  const daysOfWeek = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ];
+  const date = new Date(inputDate);
+  return daysOfWeek[date.getDay()];
+}
+
+function normalizedTem(temp) {
+  return `${(temp - 273.15).toFixed()}°C`;
+}
+
+function formatUnixTimestampAndOutputTimezone(unixTimestamp) {
+  const date = new Date(unixTimestamp * 1000);
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+  const period = hours >= 12 ? "PM" : "AM";
+  const normalizedHours = hours % 12 || 12;
+  const normalizedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+  return `${normalizedHours}:${normalizedMinutes} ${period}`;
+}
+
+function formatUnixTimestamp(unixTimestamp) {
+  const date = new Date(unixTimestamp * 1000);
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+  const normalizedHours = hours % 12 || 12;
+  const normalizedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+  return `${normalizedHours}:${normalizedMinutes}`;
+}
+
+function formatDate(inputDate) {
+  const months = [
+    "JAN", "FEB", "MAR", "APR", "MAY", "JUN",
+    "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"
+  ];
+
+  const date = new Date(inputDate);
+  const monthIndex = date.getMonth();
+  const day = date.getDate();
+
+  return `${months[monthIndex]} ${day}`;
 }
