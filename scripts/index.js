@@ -1,11 +1,13 @@
-document.addEventListener("DOMContentLoaded", function () {
-  openTab(null, "tab1");
-  document.querySelectorAll(".tab")[0].classList.add("active");
-});
+import { API_FORECAST, API_KEY } from "./consts.js";
+import {
+  groupDataByDay,
+  calculateAverageTemp,
+  formatDayOfWeek,
+  normalizedTem,
+  formatUnixTimestampAndOutputTimezone,
+  formatUnixTimestamp, formatDate,
+} from "./utils.js";
 
-const __API__ = "https://api.openweathermap.org/data/2.5";
-const API_KEY = "your api key";
-const API_FORECAST = `${__API__}/forecast`;
 const SEARCH_INPUT = document.getElementById("search");
 const BUTTON_INPUT = document.getElementById("button");
 const TAB1 = document.getElementById("tab1");
@@ -68,6 +70,7 @@ function fetchWeather(value) {
       console.log("->->->GET WEATHER DATA ERROR<-<-<-\n", e);
       TAB1.innerHTML = NOT_FOUND_SECTION;
     });
+
   fetch(`${API_FORECAST}?q=${value || inputValue}&appid=${API_KEY}`)
     .then((response) => response.json())
     .then((data) => {
@@ -82,22 +85,6 @@ function fetchWeather(value) {
 BUTTON_INPUT.onclick = () => {
   fetchWeather();
 };
-
-function openTab(event, tabName) {
-  const tabContents = document.querySelectorAll(".tab-content");
-  for (const content of tabContents) {
-    content.classList.remove("active");
-  }
-
-  const tabs = document.querySelectorAll(".tab");
-  for (const tab of tabs) {
-    tab.classList.remove("active");
-  }
-
-  const selectedTab = document.getElementById(tabName);
-  selectedTab.classList.add("active");
-  event?.currentTarget.classList.add("active");
-}
 
 function displayCurrentWeather(data) {
   const currentWeather = data.list[0];
@@ -160,8 +147,9 @@ function displayForecastWeather(data) {
 
 function createTable(list, tableId) {
   const CURRENT_WEATHER_TABLE = document.getElementById(tableId);
+  CURRENT_WEATHER_TABLE.innerHTML = "";
 
-  const titles = ["Sunday", "Forecast", "Temp", "RealFeel", "Wind (km/h)"];
+  const titles = ["Today", "Forecast", "Temp", "RealFeel", "Wind (km/h)"];
 
   const headerRow = document.createElement("tr");
   for (const title of titles) {
@@ -233,13 +221,15 @@ function createCardList(data) {
     );
 
     const title = document.createElement("h5");
+    title.classList.add('fs_m')
     const dataP = document.createElement("p");
     const img = document.createElement("img");
     const temp = document.createElement("p");
     const forecastText = document.createElement("p");
 
-    title.innerText = formatUnixTimestampAndOutputTimezone(dayForecast[0].dt);
-    dataP.innerText = formatDayOfWeek(dayForecast[0].dt);
+    title.innerText = formatDayOfWeek(dayForecast[0].dt_txt);
+    dataP.innerText = formatDate(dayForecast[0].dt_txt);
+
     img.src = `http://openweathermap.org/img/w/${dayForecast[0].weather[0].icon}.png`;
     img.width = 100;
     img.height = 100;
@@ -255,7 +245,7 @@ function createCardList(data) {
         activeCard.classList.remove("selected_day");
       }
       cardWrapper.classList.add("selected_day");
-      createDetailedWeatherTable(dayForecast);
+      createTable(dayForecast, "forecast_weather_table");
     });
 
     cardWrapper.appendChild(title);
@@ -266,83 +256,8 @@ function createCardList(data) {
     CARD_LIST.appendChild(cardWrapper);
 
     if (index === 0) {
-      createDetailedWeatherTable(dayForecast);
+      createTable(dayForecast, "forecast_weather_table");
       cardWrapper.classList.add("selected_day");
     }
   }
-}
-
-function groupDataByDay(data) {
-  const groupedData = {};
-
-  for (const forecast of data) {
-    const date = forecast.dt_txt.split(" ")[0];
-    if (!groupedData[date]) {
-      groupedData[date] = [];
-    }
-    groupedData[date].push(forecast);
-  }
-
-  return Object.values(groupedData);
-}
-
-function calculateAverageTemp(forecasts) {
-  const totalTemp = forecasts.reduce(
-    (sum, forecast) => sum + forecast.main.temp,
-    0,
-  );
-  return totalTemp / forecasts.length;
-}
-
-function formatDayOfWeek(unixTimestamp) {
-  const daysOfWeek = [
-    "Sunday",
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-  ];
-  const date = new Date(unixTimestamp * 1000);
-  return daysOfWeek[date.getDay()];
-}
-
-function normalizedTem(temp) {
-  return `${(temp - 273.15).toFixed()}°C`;
-}
-
-function formatUnixTimestampAndOutputTimezone(unixTimestamp) {
-  const date = new Date(unixTimestamp * 1000);
-  const hours = date.getHours();
-  const minutes = date.getMinutes();
-  const period = hours >= 12 ? "PM" : "AM";
-  const normalizedHours = hours % 12 || 12;
-  const normalizedMinutes = minutes < 10 ? `0${minutes}` : minutes;
-  return `${normalizedHours}:${normalizedMinutes} ${period}`;
-}
-
-function formatUnixTimestamp(unixTimestamp) {
-  const date = new Date(unixTimestamp * 1000);
-  const hours = date.getHours();
-  const minutes = date.getMinutes();
-  const normalizedHours = hours % 12 || 12;
-  const normalizedMinutes = minutes < 10 ? `0${minutes}` : minutes;
-  return `${normalizedHours}:${normalizedMinutes}`;
-}
-
-function createDetailedWeatherTable(dayForecast) {
-  const forecastTable = document.getElementById("forecast_weather_table");
-  const detailedTable = document.getElementById("detailed_weather_table");
-
-  if (detailedTable) {
-    detailedTable.remove();
-  }
-
-  const newDetailedTable = document.createElement("table");
-  newDetailedTable.id = "detailed_weather_table";
-  newDetailedTable.classList.add("padding10x20");
-  forecastTable.insertAdjacentElement("afterend", newDetailedTable);
-
-  createTable(dayForecast, "detailed_weather_table");
 }

@@ -19,8 +19,8 @@ This is a weather forecast web application that provides users with current weat
 
 ## Getting Started
 
-1. Clone the repository:
-2. Navigate to the project directory: `git clone https://github.com/your-username/weather-forecast-app.git`
+1. Clone the repository: `git clone https://github.com/your-username/weather-forecast-app.git`
+2. Navigate to the project directory
 3. Open `index.html` in your web browser.
 
 ## Screenshots
